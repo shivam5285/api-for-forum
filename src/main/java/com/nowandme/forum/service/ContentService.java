@@ -7,6 +7,7 @@ import com.nowandme.forum.model.api.DeleteRequest;
 import com.nowandme.forum.model.api.FetchRequest;
 import com.nowandme.forum.model.dao.Content;
 import com.nowandme.forum.model.api.ContentRequest;
+import com.nowandme.forum.model.dao.MaliciousRequestException;
 import com.nowandme.forum.repository.ContentRepository;
 import com.nowandme.forum.utils.JwtUtil;
 import io.jsonwebtoken.JwtException;
@@ -105,6 +106,10 @@ public class ContentService {
      */
     public Boolean deleteUserPost(DeleteRequest deleteRequest, String jwt) {
         validateJwt(deleteRequest.getUserId(), jwt);
+
+        Content content = contentRepository.findByContentId(deleteRequest.getContentId());
+        if(!content.getCreator().equals(deleteRequest.getUserId()))
+            throw new MaliciousRequestException("Trying to delete other user's content");
 
         long deletedRecord = contentRepository.deleteByContentId(deleteRequest.getContentId());
 

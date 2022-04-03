@@ -1,5 +1,6 @@
 package com.nowandme.forum.exception;
 
+import com.nowandme.forum.model.dao.MaliciousRequestException;
 import com.nowandme.forum.model.error.ApiError;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +41,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
-    @ExceptionHandler(JwtException.class)
-    protected ResponseEntity<Object> handleJwtException(JwtException ex) {
+    @ExceptionHandler({JwtException.class, MaliciousRequestException.class})
+    protected ResponseEntity<Object> handleJwtException(Exception ex) {
         log.error(ex.getMessage(), ex.getCause());
         ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
         apiError.setMessage(ex.getMessage());
