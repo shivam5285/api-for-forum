@@ -28,6 +28,14 @@ public class ContentService {
     @Autowired
     private ContentRepository contentRepository;
 
+    /**
+     *
+     * @param contentRequest
+     * @param jwt
+     * @return
+     *  Return new content with Id
+     * @throws SQLException
+     */
     public Content createNewPost(ContentRequest contentRequest, String jwt) throws SQLException {
         validateJwt(contentRequest.getUserId(), jwt);
 
@@ -39,6 +47,13 @@ public class ContentService {
         return content;
     }
 
+    /**
+     *
+     * @param fetchRequest
+     * @param jwt
+     * @return
+     *  Return all/self content of given type considering anonymity
+     */
     public List<Content> fetchContent(FetchRequest fetchRequest, String jwt) {
         validateJwt(fetchRequest.getUserId(), jwt);
         List<Content> contentList;
@@ -81,6 +96,13 @@ public class ContentService {
         return contentList;
     }
 
+    /**
+     *
+     * @param deleteRequest
+     * @param jwt
+     * @return
+     *  Return true if content is deleted
+     */
     public Boolean deleteUserPost(DeleteRequest deleteRequest, String jwt) {
         validateJwt(deleteRequest.getUserId(), jwt);
 
@@ -94,6 +116,11 @@ public class ContentService {
         return Boolean.TRUE;
     }
 
+    /**
+     *
+     * @param userId
+     * @param jwt
+     */
     private void validateJwt(String userId, String jwt) {
         try {
             Boolean isJwtValid = jwtUtil.validateToken(jwt);

@@ -21,15 +21,15 @@ public class JwtUtil {
     @Value("${jwt.expiryTimeInHours}")
     private Integer EXPIRY_TIME_HOUR;
 
-    public String extractUsername(String token) {
+    private String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public Date extractExpiration(String token) {
+    private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -42,6 +42,12 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
+    /**
+     *
+     * @param userId
+     * @return
+     *  Return JWT for usedId
+     */
     public String generateToken(String userId) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, userId);
@@ -53,11 +59,24 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
+    /**
+     *
+     * @param token
+     * @return
+     *  Return if the JWT is valid
+     */
     public Boolean validateToken(String token) {
         extractUsername(token);
         return !isTokenExpired(token);
     }
 
+    /**
+     *
+     * @param currentToken
+     * @return
+     *  Return new JWT for given JWT
+     * @throws JwtException
+     */
     public String refreshToken(String currentToken) throws JwtException {
         if(validateToken(currentToken)) {
             String userId = extractUsername(currentToken);

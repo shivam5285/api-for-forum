@@ -19,6 +19,13 @@ public class AuthenticationService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    /**
+     *
+     * @param loginRequest
+     * @return
+     *  Authenticate user and return JWT
+     * @throws AuthenticationException
+     */
     public String authenticate(LoginRequest loginRequest) throws AuthenticationException {
         Credential credential = credentialRepository.findByUserId(loginRequest.getUserId());
         if (credential == null)
