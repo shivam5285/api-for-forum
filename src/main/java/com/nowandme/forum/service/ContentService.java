@@ -6,6 +6,7 @@ import com.nowandme.forum.model.api.ContentRequest;
 import com.nowandme.forum.repository.ContentRepository;
 import com.nowandme.forum.utils.JwtUtil;
 import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class ContentService {
 
     @Autowired
@@ -29,9 +31,11 @@ public class ContentService {
         } catch (Exception e) {
             throw new JwtException("Invalid Token");
         }
+        log.debug("JWT verified for user " + contentRequest.getUserId());
         Content content = contentRepository.save(extracted(contentRequest));
         if(content == null || content.getContentId()==null)
             throw new SQLException("Could not persist in DB");
+        log.debug("Content saved in DB with content ID " + content.getContentId());
         return content;
     }
 

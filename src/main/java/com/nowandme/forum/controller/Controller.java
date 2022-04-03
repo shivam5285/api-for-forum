@@ -7,6 +7,7 @@ import com.nowandme.forum.model.api.LoginResponse;
 import com.nowandme.forum.model.api.ContentRequest;
 import com.nowandme.forum.service.AuthenticationService;
 import com.nowandme.forum.service.ContentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 
+@Slf4j
 @RestController
 public class Controller {
 
@@ -30,6 +32,7 @@ public class Controller {
     public ResponseEntity<LoginResponse> generateAuthToken(
             @RequestHeader(name = "X-Request_ID", required = true) String reqId,
             @RequestBody LoginRequest loginRequest) throws AuthenticationException {
+        log.info("Processing request with X-Request-ID " + reqId);
         final String jwt = authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(new LoginResponse(jwt));
     }
@@ -40,6 +43,7 @@ public class Controller {
             @RequestHeader(name = "X-Request_ID", required = true) String reqId,
             @RequestHeader(name = "JWT", required = true) String jwt,
             @RequestBody ContentRequest contentRequest) throws SQLException {
+        log.info("Processing request with X-Request-ID " + reqId);
         final Content content = contentService.createNewPost(contentRequest, jwt);
         return ResponseEntity.ok(content);
     }
