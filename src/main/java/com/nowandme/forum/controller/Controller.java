@@ -5,6 +5,7 @@ import com.nowandme.forum.model.api.*;
 import com.nowandme.forum.model.dao.Content;
 import com.nowandme.forum.service.AuthenticationService;
 import com.nowandme.forum.service.ContentService;
+import com.nowandme.forum.utils.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -24,6 +25,9 @@ public class Controller {
     @Autowired
     private ContentService contentService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping(value = "/user/authenticate", produces = "application/json")
     public ResponseEntity<LoginResponse> generateAuthToken(
             @RequestHeader(name = "X-Request_ID", required = true) String reqId,
@@ -31,6 +35,15 @@ public class Controller {
         log.info("Processing login request with X-Request-ID " + reqId);
         final String jwt = authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(new LoginResponse(jwt));
+    }
+
+    @GetMapping(value = "user/refresh")
+    public ResponseEntity<String> refreshJwtToken(
+            @RequestHeader(name = "X-Request_ID", required = true) String reqId,
+            @RequestHeader(name = "JWT", required = true) String jwt) {
+        log.info("Processing refresh token request with X-Request-Id " + reqId);
+        String newJwt = jwtUtil.refreshToken(jwt);
+        return ResponseEntity.ok(newJwt);
     }
 
     @Description("To create a new post or comment")
@@ -45,12 +58,12 @@ public class Controller {
     }
 
     @PostMapping(value = "/user/fetch/content", produces = "application/json")
-    public ResponseEntity<FetchResponse> fetchUserContent(
+    public ResponseEntity<FetchResponse> fetchContent(
             @RequestHeader(name = "X-Request_ID", required = true) String reqId,
             @RequestHeader(name = "JWT", required = true) String jwt,
             @RequestBody FetchRequest fetchRequest) {
         log.info("Processing fetch request with X-Request-ID " + reqId);
-        List<Content> contentList = contentService.fetchUserPost(fetchRequest, jwt);
+        List<Content> contentList = contentService.fetchContent(fetchRequest, jwt);
         return ResponseEntity.ok(new FetchResponse(contentList.size(), contentList));
     }
 

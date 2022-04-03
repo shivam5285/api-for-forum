@@ -2,6 +2,7 @@ package com.nowandme.forum.service;
 
 import com.nowandme.forum.exception.RecordNotFoundException;
 import com.nowandme.forum.model.ContentType;
+import com.nowandme.forum.model.Mode;
 import com.nowandme.forum.model.api.DeleteRequest;
 import com.nowandme.forum.model.api.FetchRequest;
 import com.nowandme.forum.model.dao.Content;
@@ -38,19 +39,45 @@ public class ContentService {
         return content;
     }
 
-    public List<Content> fetchUserPost(FetchRequest fetchRequest, String jwt) {
+    public List<Content> fetchContent(FetchRequest fetchRequest, String jwt) {
         validateJwt(fetchRequest.getUserId(), jwt);
+        List<Content> contentList;
 
-        List<Content> contentList = contentRepository.findByCreatorAndContentType(
-                fetchRequest.getUserId(),
-                fetchRequest.getContentType());
+        // Returning only user created content
+        if(fetchRequest.getMode().equals(Mode.SELF)) {
+            contentList = contentRepository.findByCreatorAndContentType(
+                    fetchRequest.getUserId(),
+                    fetchRequest.getContentType());
 
-        if(contentList==null || contentList.size()==0)
-            throw new RecordNotFoundException("No content exist for user " + fetchRequest.getUserId() +
-                    " for content type " + fetchRequest.getContentType());
+            if (contentList == null || contentList.size() == 0)
+                throw new RecordNotFoundException("No content exist for user " + fetchRequest.getUserId() +
+                        " for content type " + fetchRequest.getContentType());
 
-        log.debug("Found contents of user " + fetchRequest.getUserId() + " from DB for content type " +
-                fetchRequest.getContentType());
+            log.debug("Found contents of user " + fetchRequest.getUserId() + " from DB for content type " +
+                    fetchRequest.getContentType());
+            return contentList;
+        }
+
+        // Returning all content considering anonymity
+        else {
+            contentList = contentRepository.findByContentType(
+                    fetchRequest.getContentType());
+
+            if (contentList == null || contentList.size() == 0)
+                throw new RecordNotFoundException("No content exists for type " + fetchRequest.getContentType());
+
+            log.debug("Found contents from DB for content type " +
+                    fetchRequest.getContentType());
+
+            // Hiding creator information for anonymous posts
+            for(Content content: contentList) {
+                if(content.getIsAnonymous() && !content.getCreator().equals(fetchRequest.getUserId())) {
+                    content.setCreator(null);
+                }
+            }
+
+            log.debug("Creator information hiding for anonymous posts successful");
+        }
         return contentList;
     }
 

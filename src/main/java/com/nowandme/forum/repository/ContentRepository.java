@@ -11,5 +11,6 @@ import java.util.List;
 public interface ContentRepository extends CrudRepository<Content, Integer> {
     Content findByContentId(Integer contentId);
     List<Content> findByCreatorAndContentType(String creator, ContentType contentType);
+    List<Content> findByContentType(ContentType contentType);
     long deleteByContentId(Integer contendId);
 }

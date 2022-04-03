@@ -58,7 +58,7 @@ public class JwtUtil {
         return !isTokenExpired(token);
     }
 
-    private String refreshToken(String currentToken) throws JwtException {
+    public String refreshToken(String currentToken) throws JwtException {
         if(validateToken(currentToken)) {
             String userId = extractUsername(currentToken);
             return generateToken(userId);
